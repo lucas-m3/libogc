@@ -18,6 +18,11 @@
 
 #include "motion_plus.h"
 
+static void _motion_plus_calib_check(struct wiimote_t *wm, ubyte *data, uword len) {
+	// TODO - check crc32 and value coherence
+	if(len != 32) WIIUSE_WARNING("Wrong mp calib size!");
+}
+
 static void wiiuse_probe_motion_plus_check2(struct wiimote_t *wm, ubyte *data, uword len)
 {
 	WIIMOTE_ENABLE_STATE(wm, WIIMOTE_STATE_MPLUS_PRESENT);
@@ -70,6 +75,10 @@ void wiiuse_motion_plus_check(struct wiimote_t *wm,ubyte *data,uword len)
 			WIIMOTE_ENABLE_STATE(wm,WIIMOTE_STATE_EXP);
 			wiiuse_set_ir_mode(wm);
 			wiiuse_status(wm, NULL);
+
+			/* read motion plus calibration */
+			wiiuse_read_data(wm, (ubyte*)&wm->exp.mp.calib, WM_EXP_MEM_CALIBR, 32, _motion_plus_calib_check);
+
 		}
 	}
 }
@@ -88,7 +97,6 @@ static void wiiuse_set_motion_plus_clear1(struct wiimote_t *wm,ubyte *data,uword
 	ubyte val = 0x00;
 	wiiuse_write_data(wm,WM_EXP_MEM_ENABLE1,&val,1,wiiuse_set_motion_plus_clear2);
 }
-
 
 void wiiuse_set_motion_plus(struct wiimote_t *wm, int status)
 {

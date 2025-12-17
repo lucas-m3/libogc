@@ -536,11 +536,39 @@ typedef struct wii_board_t {
 	float y;
 } wii_board_t;
 
+typedef struct  __attribute__((packed)) motion_plus_calib_block_t
+{
+	// Gyro values at 0 deg/sec to 16 bits of precision.
+	unsigned short yaw_zero;
+	unsigned short roll_zero;
+	unsigned short pitch_zero;
+	// Gyro values at "scale" deg/sec.
+	unsigned short yaw_scale;
+	unsigned short roll_scale;
+	unsigned short pitch_scale;
+	// Angular velocity of the above scale values in deg/sec divided by 6.
+	// e.g. A value of 45 would mean the "scale" values represent the gyro at 270 deg/sec.
+	unsigned char degrees_div_6;
+} motion_plus_calib_block_t;
+
+typedef struct motion_plus_calib_t
+{
+	// Calibration for "fast" mode.
+	motion_plus_calib_block_t fast;
+	unsigned char uid_1;
+	unsigned short crc32_msb;
+	// Calibration for "slow" mode.
+	motion_plus_calib_block_t slow;
+	unsigned char uid_2;
+	unsigned short crc32_lsb;
+} motion_plus_calib_t;
+
 typedef struct motion_plus_t
 {
 	short rx, ry, rz;
 	ubyte status;
 	ubyte ext;
+	motion_plus_calib_t calib;
 } motion_plus_t;
 
 /**
